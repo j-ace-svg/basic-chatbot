@@ -16,7 +16,7 @@ std::map<std::string, int> openEndedKeywordMap = {
 	{ "philosophy", 1 },
 	{ "language", 1},
 
-	{ "Problem", 2},
+	{ "problem", 2},
 	{ "issue", 2 },
 	{ "fault", 2 },
 	{ "mistake", 2 },
@@ -67,9 +67,8 @@ std::map<std::string, int> openEndedKeywordMap = {
 	{ "target", 7 },
 };
 
-int categorizeInput(std::string input) {
-	for (auto const& pair : openEndedKeywordMap) {
-		std::cout << input.find(pair.first, 0);
+int categorizeInput(std::string input, std::map<std::string, int> categoryMap) {
+	for (auto const& pair : categoryMap) {
 		if (input.find(pair.first, 0) != std::string::npos) {
 			return pair.second;
 		}
@@ -77,17 +76,66 @@ int categorizeInput(std::string input) {
 	return 0;
 }
 
-int main() {
+void openEndedLoop() {
 	while (true) {
 		std::string input;
-		std::cin >> input;
-		int inputCategory = categorizeInput(input);
+		std::getline(std::cin, input);
+		for (char &c : input) {
+			c = std::tolower(c);
+		}
+		int inputCategory = categorizeInput(input, openEndedKeywordMap);
 		if (inputCategory == 0) {
 			break;
 		}
 		std::cout << openEndedResponseMap[inputCategory];
 		std::cout << '\n';
 	}
+}
+
+void editorPromptLoop() {
+	while (true) {
+		std::string input;
+		std::getline(std::cin, input);
+		for (char &c : input) {
+			c = std::tolower(c);
+		}
+		int inputCategory = categorizeInput(input, openEndedKeywordMap);
+		if (inputCategory == 0) {
+			break;
+		}
+		std::cout << openEndedResponseMap[inputCategory];
+		std::cout << '\n';
+	}
+}
+
+typedef void (*SessionLoop)(void);
+
+std::map<std::string, int> mainMenuResponseMap = {
+	{ "open", 1 },
+	{ "o", 1 }
+};
+
+std::map<int, SessionLoop> sessionMap = {
+	{ 1, &openEndedLoop }
+};
+
+int main() {
+	while (true) {
+		std::cout << "Select menu:\n"
+			<< "  Open ended conversation (`open')\n";
+		std::string input;
+		std::getline(std::cin, input);
+		for (char &c : input) {
+			c = std::tolower(c);
+		}
+		int inputCategory = categorizeInput(input, mainMenuResponseMap);
+		if (inputCategory == 0) {
+			std::cout << "Unrecognized input. ";
+		} else {
+			sessionMap[inputCategory]();
+		}
+	}
+	openEndedLoop();
 
 	return 0;
 }
