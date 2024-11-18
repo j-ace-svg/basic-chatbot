@@ -108,9 +108,17 @@ void editorPromptLoop() {
 	}
 }
 
+template <size_t N>
+
+void printInputOptions(const int (&menuOptions)[N]) {
+
+}
+
 typedef void (*SessionLoop)(void);
 
 std::map<std::string, int> mainMenuResponseMap = {
+	{ "quit", -1},
+	{ "q", -1},
 	{ "open", 1 },
 	{ "o", 1 }
 };
@@ -119,23 +127,33 @@ std::map<int, SessionLoop> sessionMap = {
 	{ 1, &openEndedLoop }
 };
 
+std::string homeMenuOptions[2][2] = {
+	{ "Open ended conversation", "open" },
+	{ "Quit", "quit" }
+};
+
 int main() {
 	while (true) {
-		std::cout << "Select menu:\n"
-			<< "  Open ended conversation (`open')\n";
+		std::cout << "Select menu:\n";
+		for (std::string option[2] : homeMenuOptions) {
+			std::cout << "  " << option[0]
+				<< " (`" << option[1] << "')"
+				<< std::endl;
+		}
 		std::string input;
 		std::getline(std::cin, input);
 		for (char &c : input) {
 			c = std::tolower(c);
 		}
 		int inputCategory = categorizeInput(input, mainMenuResponseMap);
-		if (inputCategory == 0) {
+		if (inputCategory == -1) {
+			break;
+		} else if (inputCategory == 0) {
 			std::cout << "Unrecognized input. ";
 		} else {
 			sessionMap[inputCategory]();
 		}
 	}
-	openEndedLoop();
 
 	return 0;
 }
