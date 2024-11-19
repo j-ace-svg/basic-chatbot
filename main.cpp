@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <utility>
 
 std::map<int, std::string> openEndedResponseMap = {
 	{ 1, "The \"Zen\" of vi is that you're speaking a language. The initial y is a verb. The statement yy is a synonym for y_. The y is doubled up to make it easier to type, since it is such a common operation." },
@@ -67,6 +68,35 @@ std::map<std::string, int> openEndedKeywordMap = {
 	{ "target", 7 },
 };
 
+std::map<int, std::string> editorPromptResponseMap = {
+	{ 1, "Vim is a very %f editor" },
+	{ 2, "Base emacs is a very %f editor" }
+};
+
+
+std::map<std::string, int> editorPromptKeywordMap = {
+	{ "fast", 1 },
+	{ "efficient", 1 },
+	{ "productive", 1 },
+	{ "ergonomic", 1 },
+	{ "optimal", 1 },
+	{ "good", 1 },
+
+	{ "slow", 2 },
+	{ "obtuse", 2 },
+	{ "inefficient", 2 },
+	{ "unproductive", 2 },
+	{ "awkward", 2 },
+	{ "poor", 2 },
+	{ "bad", 2 }
+};
+
+std::map<int, std::string> writingPromptResponseMap = {
+	{ 1, "Latex plugins for Vim can make it a highly efficient tool for writing math." },
+	{ 2, "Vim has spellcheck and autocomplete which can be enabled, and the efficient movement makes it great for writing" },
+	{ 3, "Vim’s rapid editing and massive extensibility makes it an amazing tool for programming" }
+};
+
 int categorizeInput(std::string input, std::map<std::string, int> categoryMap) {
 	for (auto const& pair : categoryMap) {
 		if (input.find(pair.first, 0) != std::string::npos) {
@@ -74,6 +104,15 @@ int categorizeInput(std::string input, std::map<std::string, int> categoryMap) {
 		}
 	}
 	return 0;
+}
+
+std::pair<const std::string, int> categorizeInputWithKeyword(std::string input, std::map<std::string, int> categoryMap) {
+	for (auto const& pair : categoryMap) {
+		if (input.find(pair.first, 0) != std::string::npos) {
+			return pair;
+		}
+	}
+	return std::make_pair("", 0);
 }
 
 void openEndedLoop() {
@@ -93,25 +132,30 @@ void openEndedLoop() {
 }
 
 void editorPromptLoop() {
-	while (true) {
-		std::string input;
-		std::getline(std::cin, input);
-		for (char &c : input) {
-			c = std::tolower(c);
-		}
-		int inputCategory = categorizeInput(input, openEndedKeywordMap);
-		if (inputCategory == 0) {
-			break;
-		}
-		std::cout << openEndedResponseMap[inputCategory];
-		std::cout << '\n';
+	std::cout << "What do you want in a text editor?\n";
+
+	std::string input;
+	std::getline(std::cin, input);
+	for (char &c : input) {
+		c = std::tolower(c);
 	}
+	std::pair<const std::string, int> inputCategory = categorizeInputWithKeyword(input, editorPromptKeywordMap);
+	if (inputCategory.second == 0) {
+		return;
+	}
+	printf(editorPromptResponseMap[inputCategory.first], inputCategory.first);
+	std::cout << '\n';
 }
 
 template <size_t N>
 
-void printInputOptions(const int (&menuOptions)[N]) {
-
+void printInputOptions(const std::string (&menuOptions)[N][2]) {
+	std::cout << "Select menu:\n";
+	for (std::string option[2] : menuOptions) {
+		std::cout << "  " << option[0]
+			<< " (`" << option[1] << "')"
+			<< std::endl;
+	}
 }
 
 typedef void (*SessionLoop)(void);
@@ -120,26 +164,26 @@ std::map<std::string, int> mainMenuResponseMap = {
 	{ "quit", -1},
 	{ "q", -1},
 	{ "open", 1 },
-	{ "o", 1 }
+	{ "o", 1 },
+	{ "editor", 2},
+	{ "e", 2},
 };
 
 std::map<int, SessionLoop> sessionMap = {
-	{ 1, &openEndedLoop }
+	{ 1, &openEndedLoop },
+	{ 2, &editorPromptLoop }
 };
 
 std::string homeMenuOptions[2][2] = {
 	{ "Open ended conversation", "open" },
+	{ "Editor selection prompt", "editor" },
 	{ "Quit", "quit" }
 };
 
 int main() {
 	while (true) {
-		std::cout << "Select menu:\n";
-		for (std::string option[2] : homeMenuOptions) {
-			std::cout << "  " << option[0]
-				<< " (`" << option[1] << "')"
-				<< std::endl;
-		}
+		printInputOptions(homeMenuOptions);
+
 		std::string input;
 		std::getline(std::cin, input);
 		for (char &c : input) {
