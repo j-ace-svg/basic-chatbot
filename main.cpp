@@ -230,11 +230,11 @@ std::map<std::string, int> mainMenuResponseMap = {
 	{ "editor", 2},
 	{ "writing", 3},
 	{ "name", 4},
-	{ "q", -1},
-	{ "o", 1 },
-	{ "e", 2},
-	{ "w", 3},
-	{ "n", 4},
+	{ "qu", -1},
+	{ "op", 1 },
+	{ "ed", 2},
+	{ "wr", 3},
+	{ "na", 4},
 };
 
 std::map<int, SessionLoop> sessionMap = {
