@@ -9,7 +9,9 @@ std::map<int, std::string> openEndedResponseMap = {
 	{ 4, "If you only understand basic up, down, left, and right cursor movements then vi will be no more productive than a copy of \"notepad\" for you. (Okay, you'll still have syntax highlighting and the ability to handle files larger than a piddling ~45KB or so; but work with me here)." },
 	{ 5, "So, one way to cut an arbitrary selection of text would be to drop a mark (I usually use 'a' as my \"first\" mark, 'z' as my next mark, 'b' as another, and 'e' as yet another (I don't recall ever having interactively used more than four marks in 15 years of using vi; one creates one's own conventions regarding how marks and registers are used by macros that don't disturb one's interactive context). Then we go to the other end of our desired text; we can start at either end, it doesn't matter. Then we can simply use d`a to cut or y`a to copy. Thus the whole process has a 5 keystrokes overhead (six if we started in \"insert\" mode and needed to Esc out command mode). Once we've cut or copied then pasting in a copy is a single keystroke: p." },
 	{ 6, "Frequently we can more succinctly describe the range of text without moving our cursor around and dropping a mark. For example if I'm in a paragraph of text I can use { and } movements to the beginning or end of the paragraph respectively. So, to move a paragraph of text I cut it using { d} (3 keystrokes). (If I happen to already be on the first or last line of the paragraph I can then simply use d} or d{ respectively." },
-	{ 7, "In addition to \"verbs\" and \"subjects\" vi also has \"objects\" (in the grammatical sense of the term). So far I've only described the use of the anonymous register. However, I can use any of the 26 \"named\" registers by prefixing the \"object\" reference with \" (the double quote modifier). Thus if I use \"add I'm cutting the current line into the 'a' register and if I use \"by/foo then I'm yanking a copy of the text from here to the next line containing \"foo\" into the 'b' register. To paste from a register I simply prefix the paste with the same modifier sequence: \"ap pastes a copy of the 'a' register's contents into the text after the cursor and \"bP pastes a copy from 'b' to before the current line." }
+	{ 7, "In addition to \"verbs\" and \"subjects\" vi also has \"objects\" (in the grammatical sense of the term). So far I've only described the use of the anonymous register. However, I can use any of the 26 \"named\" registers by prefixing the \"object\" reference with \" (the double quote modifier). Thus if I use \"add I'm cutting the current line into the 'a' register and if I use \"by/foo then I'm yanking a copy of the text from here to the next line containing \"foo\" into the 'b' register. To paste from a register I simply prefix the paste with the same modifier sequence: \"ap pastes a copy of the 'a' register's contents into the text after the cursor and \"bP pastes a copy from 'b' to before the current line." },
+	{ 8, "Hey, now. I'm not the focus of the conversation here." },
+	{ 9, "Hello, user." }
 };
 
 std::map<std::string, int> openEndedKeywordMap = {
@@ -70,6 +72,14 @@ std::map<std::string, int> openEndedKeywordMap = {
 	{ "specify mark", 7 },
 	{ "specify a mark", 7 },
 	{ "target", 7 },
+
+	{ "you", 8 },
+
+	{ "hello", 9 },
+	{ "hi", 9 },
+	{ "welcome", 9 },
+	{ "greetings", 9 },
+	{ "wassap", 9 },
 };
 
 std::map<int, std::string> editorPromptResponseMap = {
@@ -77,9 +87,9 @@ std::map<int, std::string> editorPromptResponseMap = {
 	{ 2, "Base emacs is a very %s editor" }
 };
 
-
 std::map<std::string, int> editorPromptKeywordMap = {
 	{ "fast", 1 },
+	{ "quick", 1 },
 	{ "efficient", 1 },
 	{ "productive", 1 },
 	{ "ergonomic", 1 },
@@ -96,9 +106,21 @@ std::map<std::string, int> editorPromptKeywordMap = {
 };
 
 std::map<int, std::string> writingPromptResponseMap = {
-	{ 1, "Latex plugins for Vim can make it a highly efficient tool for writing math." },
-	{ 2, "Vim has spellcheck and autocomplete which can be enabled, and the efficient movement makes it great for writing" },
-	{ 3, "Vim’s rapid editing and massive extensibility makes it an amazing tool for programming" }
+	{ 1, "Latex plugins for Vim can make it a highly efficient tool for writing %s." },
+	{ 2, "Vim has spellcheck and autocomplete which can be enabled, and the efficient movement makes it great for writing %s" },
+	{ 3, "Vim’s rapid editing and massive extensibility makes it an amazing tool for %s" }
+};
+
+std::map<std::string, int> writingPromptKeywordMap = {
+	{ "math", 1 },
+
+	{ "stories", 2 },
+	{ "prose", 2 },
+	{ "english", 2 },
+
+	{ "code", 3 },
+	{ "programming", 3 },
+	{ "script", 3 },
 };
 
 int categorizeInput(std::string input, std::map<std::string, int> categoryMap) {
@@ -123,7 +145,8 @@ void openEndedLoop() {
 	std::cout << std::endl << "<Starting open-ended conversation>" << std::endl;
 	while (true) {
 		std::string input;
-		std::cout << "User: ";
+		std::cout << std::endl << "User:" << std::endl
+			<< "  ";
 		std::getline(std::cin, input);
 		for (char &c : input) {
 			c = std::tolower(c);
@@ -132,7 +155,8 @@ void openEndedLoop() {
 		if (inputCategory == -1) {
 			break;
 		}
-		std::cout << "Chatbot: ";
+		std::cout << std::endl << "Chatbot:" << std::endl
+			<< "  ";
 		if (inputCategory == 0) {
 			std::cout << "I'm sorry, I'm not sure what that means." << std::endl;
 			continue;
@@ -143,7 +167,8 @@ void openEndedLoop() {
 }
 
 void editorPromptLoop() {
-	std::cout << "What do you want in a text editor?" << std::endl;
+	std::cout << std::endl << "What do you want in a text editor?" << std::endl
+		<< "  ";
 
 	std::string input;
 	std::getline(std::cin, input);
@@ -159,11 +184,38 @@ void editorPromptLoop() {
 	std::cout << std::endl;
 }
 
+void writingPromptLoop() {
+	std::cout << std::endl << "What kind of writing do you do the most?" << std::endl
+		<< "  ";
+
+	std::string input;
+	std::getline(std::cin, input);
+	for (char &c : input) {
+		c = std::tolower(c);
+	}
+	std::pair<const std::string, int> inputCategory = categorizeInputWithKeyword(input, writingPromptKeywordMap);
+	if (inputCategory.second == 0) {
+		std::cout << "I'm sorry, I'm not sure what that means." << std::endl;
+		return;
+	}
+	printf(writingPromptResponseMap[inputCategory.second].c_str(), inputCategory.first.c_str());
+	std::cout << std::endl;
+}
+
+void namePromptLoop() {
+	std::cout << std::endl << "What is your name?" << std::endl
+		<< "  ";
+
+	std::string input;
+	std::getline(std::cin, input);
+	std::cout << "Hello, " << input << std::endl;
+}
+
 template <size_t N>
 
 void printInputOptions(const std::string (&menuOptions)[N][2]) {
 	std::cout << std::endl << "Select menu:" << std::endl;
-	for (std::string option[2] : menuOptions) {
+	for (const auto& option : menuOptions) {
 		std::cout << "  " << option[0]
 			<< " (`" << option[1] << "')"
 			<< std::endl;
@@ -176,16 +228,27 @@ std::map<std::string, int> mainMenuResponseMap = {
 	{ "quit", -1},
 	{ "open", 1 },
 	{ "editor", 2},
+	{ "writing", 3},
+	{ "name", 4},
+	{ "q", -1},
+	{ "o", 1 },
+	{ "e", 2},
+	{ "w", 3},
+	{ "n", 4},
 };
 
 std::map<int, SessionLoop> sessionMap = {
 	{ 1, &openEndedLoop },
-	{ 2, &editorPromptLoop }
+	{ 2, &editorPromptLoop },
+	{ 3, &writingPromptLoop },
+	{ 4, &namePromptLoop },
 };
 
-std::string homeMenuOptions[3][2] = {
+std::string homeMenuOptions[5][2] = {
 	{ "Open ended conversation", "open" },
 	{ "Editor selection prompt", "editor" },
+	{ "Writing type prompt", "writing" },
+	{ "Name prompt", "name" },
 	{ "Quit", "quit" }
 };
 
